@@ -1,0 +1,15 @@
+[Unit]
+After=network.target
+
+[Service]
+Environment=JMX_PORT=9999
+Environment=LOG_DIR=/var/log/kafka
+WorkingDirectory=/opt/kafka_2.13-3.8.0
+ExecStart=/opt/kafka_2.13-3.8.0/bin/kafka-server-start.sh /opt/kafka_2.13-3.8.0/config/server.properties
+#ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartForceExitStatus=SIGPIPE
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target

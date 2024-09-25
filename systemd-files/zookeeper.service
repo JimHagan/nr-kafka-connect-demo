@@ -1,0 +1,12 @@
+[Unit]
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/kafka_2.13-3.8.0
+ExecStart=/opt/kafka_2.13-3.8.0/bin/zookeeper-server-start.sh config/zookeeper.properties
+Restart=on-failure
+RestartForceExitStatus=SIGPIPE
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target
