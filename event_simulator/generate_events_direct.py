@@ -31,7 +31,7 @@ def _get_random_event():
     random.seed()
     event = 'Purchase'
     random.seed()
-    customer_account = random.choice([3, 7, 22, 100])
+    customer_account = random.randint(9875,15321)
     random.seed()
     product_info = random.choice([('burger', 3.25), ('fries', 1.25), ('coke', 1.50), ('root beer', 1.50)])
     return  \
@@ -42,7 +42,8 @@ def _get_random_event():
                 "product": product_info[0],
                 "location": location,
                 "pipeline": 'direct',
-                "timestamp":int(time.time())
+                "timestamp": int(time.time()),
+                "message": "Customer {} purchased {} for ${}".format(customer_account, product_info[0], product_info[1])
              }
 
 
