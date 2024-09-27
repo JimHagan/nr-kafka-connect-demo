@@ -82,7 +82,7 @@ cd /opt/kafka_2.13-2.6.0
 ./bin/connect-standalone.sh ./config/connect-standalone.properties /opt/connectors/newrelic-newrelic-kafka-connector/nr_events.properties
 ```
 
-*NOTE* If you wish to process the data as a New Relic log replace `nr_events.properties` with `nr_logs.properties`
+*NOTE* If you wish to process the data as a New Relic log replace `nr_events.properties` with `nr_logs.properties` or to send a metric version of the event use `nr_metrics.properties`.
 
 If successful you'll see a lot of verbose output, but at the end you'll see something like (but not exactly):
 
@@ -116,7 +116,7 @@ An additional way to determine that everything is a-okay is to run the command `
 
     The 200 confirms that New Relic received the data and you will be able to see `Purchase` events on the backend.
 
-- Now run the kafka sender with `python generate_events_kafka.py`.  You'll see very similar output to the previous command except in stead of a 200 and a UUID from the New Relic API you'll get something like this `<kafka.producer.future.FutureRecordMetadata object at 0x7f0fa5bde588>` which is Kafka confirming our message was received.  In addition the console consumer we setup earlier will echo the event object (since it's consuming from the `nr_events` or `nr_logs` topic).  Most iportantly your Kafka Connect standalone worker will output something like this:
+- Now run the kafka sender with `python generate_events_kafka.py`.  You'll see very similar output to the previous command except in stead of a 200 and a UUID from the New Relic API you'll get something like this `<kafka.producer.future.FutureRecordMetadata object at 0x7f0fa5bde588>` which is Kafka confirming our message was received.  In addition the console consumer we setup earlier will echo the event object (since it's consuming from the `nr_events` or `nr_logs` topic).  We'll also send a count metric to the `nr_metrics` topic.  Most iportantly your Kafka Connect standalone worker will output something like this:
 
     ```
     [2020-11-21 15:35:23,456] INFO Response from new relic Response{statusCode=200, statusMessage='OK', body='{"success":true, "uuid":"2adb36fa-0021-b000-0000-0175eb721427"}'} (com.newrelic.telemetry.events.TelemetryEventsSinkTask:126)
@@ -126,11 +126,18 @@ That's the worker confirming that it consumed the message from Kafka and success
 
 2. On the backend we'll want to setup a dashboard or simply setup the following queries in the New Relic data explorere: 
 
+
+    For the Purchase custom event:
+
     `SELECT count(*) from Purchase facet product, location, pipeline`
 
-    or 
+    For the log data derived from the event:
 
     `SELECT count(*) from Log where pipeline = 'kafka-connect' facet product, location`
+
+    For the count metric created from the event:
+
+    `SELECT count(*) from Metric where metricName = 'purchase.count'  since 15 minutes ago facet location TIMESERIES`
 
 ### Example Dashboard
 

@@ -5,6 +5,7 @@ import time
 from kafka import KafkaProducer
 
 _events = []
+_metrics = []
 
 def _get_random_event():
     random.seed()
@@ -35,6 +36,21 @@ for i in range(random.randint(10, 40)):
     _event = _get_random_event()
     print(_event)
     _events.append(_event)
+    _metrics.append(
+    {
+        "name" : "purchase.count",
+        "type" : "count",
+        "value" : 1,
+        "interval.ms" : 10000,
+        "timestamp" : _event["timestamp"],
+        "dimensions" : {
+            "product" : _event["product"],
+            "location" : _event["location"],
+            "pipeline": _event["pipeline"],
+            "collector.metadata.kafka.topic" : "nr_metrics"
+        }
+    })
+
     time.sleep(1)
 
 
@@ -50,6 +66,10 @@ for ev in _events:
     response = producer.send('nr_events', json.dumps(ev).encode('utf-8'))
     print(response)
     response = producer.send('nr_logs', json.dumps(ev).encode('utf-8'))
+    print(response)
+
+for metric in _metrics:
+    response = producer.send('nr_metrics', json.dumps(metric).encode('utf-8'))
     print(response)
 
 
